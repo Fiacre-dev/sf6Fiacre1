@@ -8,11 +8,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/todo')]
-#[Route('/todo', name: 'todo')]
+#[Route("/todo")]
 class TodoController extends AbstractController
 {
-    #[Route('/', name: 'todo')]
+    #[Route("/", name: "todo")]
     //Injection de l'objet Request
     public function index(Request $request): Response
     {
@@ -33,7 +32,7 @@ class TodoController extends AbstractController
         return $this->render('todo/index.html.twig');
     }
     //Association de route à cette  fonctionnalité addTodo
-    #[Route('/add/{name}/{content}',name:'todo.add')]
+    #[Route('/add/{name}/{content}', name: 'todo.add')]
     public function addTodo(Request $request,$name,$content): RedirectResponse{
         //Voici l'algorithme à utiliser pour gerer notre todo
         $session=$request->getSession();//Recuperation de l'objet request et  getSession pour recuperer ma session
@@ -55,12 +54,11 @@ class TodoController extends AbstractController
                 }
         }else{
               //Si non
-
              //afficher une erreur et on  va rediriger vers le controller initial (le controller index)
              $this->addFlash('error',"La liste des todos n'est pas encore  initialisée");
         }
         //Affichage de la liste todo soit avec forword ou redirect
-        return $this->redirectToRoute('todo_index');
+        return $this->redirectToRoute('todo/index.html.twig');
     }
 
     #[Route('/update/{name}/{content}',name:'todo.update')]

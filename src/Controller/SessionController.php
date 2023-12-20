@@ -13,16 +13,21 @@ class SessionController extends AbstractController
     public function index(Request $request): Response
     {
         //session_start()
+
         $session=$request -> getSession();
+
         if($session -> has(name:'nbVisite')){
+
             $nbreVisite= $session->get(name:'nbVisite') + 1;
+
             //Mettons a jour nbreVisite
             $session->set('nbVisite',$nbreVisite);
         }else{
             $nbreVisite=1;
         }
+
         $session->set('nbVisite',$nbreVisite);
-       
+
         return $this->render('session/index.html.twig');
     }
 }
