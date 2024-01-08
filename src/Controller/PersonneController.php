@@ -3,15 +3,27 @@
 namespace App\Controller;
 
 use App\Entity\Personne;
+use App\Form\PersonneType;
+use App\service\Helpers;
+use App\service\MailerService;
+use App\service\UploaderService;
 use Doctrine\Persistence\ManagerRegistry;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/personne')]
 class PersonneController extends AbstractController
 {
+
+    public function __construct(private LoggerInterface $logger, private Helpers $helper)
+    { }
+
     //La liste
     #[Route('/', name: 'personne.list')]
     public function index(ManagerRegistry $doctrine): Response
@@ -52,6 +64,8 @@ class PersonneController extends AbstractController
     #[Route('/alls/{page?1}/{nbre?12}', name: 'personne.list.alls')]
     public function indexalls(ManagerRegistry $doctrine, $page, $nbre): Response
     {
+       echo ($this->helper ->sayCc());
+
         $repository = $doctrine->getRepository(Personne::class);
         $nbPersonne = $repository->count([]);
         
@@ -80,30 +94,65 @@ class PersonneController extends AbstractController
     }
 
     //Ajout d'une personne
-    #[Route('/add', name: 'personne.add')]
-    public function addPersonne(ManagerRegistry $doctrine): Response
+    #[Route('/edit/{id?0}', name: 'personne.edit')]
+    public function addPersonne(
+        Personne $personne=null,
+        ManagerRegistry $doctrine,
+        Request $request ,
+        UploaderService $uploaderService,
+        MailerService $mailer,
+    ): Response
     {
-        $entityManager = $doctrine->getManager();
-        $personne = new Personne();
-        $personne->setFirstname('Ficre');
-        $personne->setName('AZANHOUN');
-        $personne->setAge(25); // L'âge devrait être un nombre, pas une chaîne
+        $new=false;
+        if(!$personne){
+            $new=true;
+            $personne = new Personne();
+        }
+        //$personne est l'image de notre formulaire
+        $form = $this -> createForm(PersonneType::class, $personne);
+        $form->remove('createdAt');
+        $form->remove('updatedAt');
+        //Mon formulaire va  aller traiter la request
+        // association de la request envoyer avec le formulaire
+        $form -> handleRequest($request);
+        //Est ce que le formulaire à ete soumis
+        if($form->isSubmitted() && $form ->isValid()){
+            //Si oui
+            //on va ajourter l'objet personne dans la base de données
+            $photo = $form->get('photo')->getData();
 
-        // Commenter la section suivante pour éviter une erreur
-        /*
-        $personne2 = new Personne();
-        $personne2->setFirstname('Debora');
-        $personne2->setName('ZANMENOU');
-        $personne2->setAge(20);
+            // this condition is needed because the 'brochure' field is not required
+            // so the PDF file must be processed only when a file is uploaded
+            if ($photo) {
+                $directory =  $this->getParameter('personne_directory');
 
-        $entityManager->persist($personne2);
-        */
+                $personne->setImage($uploaderService->uploadFile($photo,$directory));
+            }
 
-       // $entityManager->persist($personne);
-        $entityManager->flush();
+            $manager = $doctrine->getManager();
+            $manager->persist($personne);
+            $manager->flush();
+            
+            if($new){
+                $message="à été ajouté avec succès";
+            }else{
+                $message="à été mis à jour avec succès";
+            }
+            $mailMessage= $personne->getFirstname().' '.$personne->getName().' '.$message;
+            //Afficher un message du succes
+            $this->addFlash('success', $personne->getName() . $message);
+            $mailer ->sendEmail(content: $mailMessage);
+            //Si non  rediriger vers la liste des personnes
+            return $this->redirectToRoute('/');
+        }else{
+            //Si non
+           // on affiche le formulaire
+            return $this->render('personne/add-personne.html.twig', [
+                'form'=>$form ->createView()
+             ]);
+        }
 
-        return $this->render('personne/detail.html.twig', ['personne' => $personne]);
-    }
+     }
 
     //Suppression d'une personnes
     #[Route('/delete/{id}' ,name:'personne.delete')]

@@ -14,9 +14,14 @@ trait TimeStampTrait
     private ?\DateTimeInterface $updatedAt = null;
 
     public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
+{
+    if ($this->createdAt instanceof \DateTimeInterface) {
+        return \DateTimeImmutable::createFromMutable($this->createdAt);
     }
+
+    return null;
+}
+
 
     public function setCreatedAt(?\DateTimeImmutable $createdAt): static
     {
