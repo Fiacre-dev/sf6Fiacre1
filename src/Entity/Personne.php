@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PersonneRepository::class)]
-#[ORM\HasLifecycleCallbacks()]
+#[ORM\HasLifecycleCallbacks]
 class Personne
 {
     use TimeStampTrait; 
@@ -87,11 +87,6 @@ private ?string $firstname = null;
         return $this;
     }
 
-    public function getAge(): ?int
-    {
-        return $this->age;
-    }
-
     public function setAge(int $age): static
     {
         $this->age = $age;
@@ -123,30 +118,6 @@ private ?string $firstname = null;
         return $this;
     }
 
-    /**
-     * @return Collection<int, Hobby>
-     */
-    public function getHobbies(): Collection
-    {
-        return $this->Hobbies;
-    }
-
-    public function addHobby(Hobby $hobby): static
-    {
-        if (!$this->Hobbies->contains($hobby)) {
-            $this->Hobbies->add($hobby);
-        }
-
-        return $this;
-    }
-
-    public function removeHobby(Hobby $hobby): static
-    {
-        $this->Hobbies->removeElement($hobby);
-
-        return $this;
-    }
-
     public function getJob(): ?Job
     {
         return $this->job;
@@ -157,11 +128,6 @@ private ?string $firstname = null;
         $this->job = $job;
 
         return $this;
-    }
-
-    public function getImage(): ?string
-    {
-        return $this->image;
     }
 
     public function setImage(?string $image): static

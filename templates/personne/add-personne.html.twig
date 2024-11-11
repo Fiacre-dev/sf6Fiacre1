@@ -2,13 +2,14 @@
 
 {% block body %}
 
-{{ form_start(form,  {'attr': {'novalidate': 'novalidate'}}) }}
-<div class="row">
-    <div class="col"> {{ form_row(form.firstname) }} </div>
-    <div class="col">{{ form_row(form.name) }}</div>
-</div>
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
-    {{ form_rest(form) }}
+    <div class="row">
+        <div class="col"> {{ form_row(form.firstname) }} </div>
+        <div class="col">{{ form_row(form.name) }}</div>
+    </div>
+
+    {{ form_end(form) }}
 
 {% endblock %}
 
@@ -19,7 +20,7 @@
 {% block javascripts %}
     <script>
         $(document).ready(function() {
-        $('.select2').select2();
+            $('.select2').select2();
+        });
     </script>
-});
 {% endblock %}

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Personne;
 use App\Event\AddPersonneEvent;
+use App\Event\ListAllPersonnesEvent;
 use App\Form\PersonneType;
 use App\service\Helpers;
 use App\service\MailerService;
@@ -13,13 +14,11 @@ use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[
     Route('personne'),
@@ -57,6 +56,7 @@ class PersonneController extends AbstractController
     {
         $repository = $doctrine->getRepository(Personne::class);
         $personnes = $repository->findPersonnesByAgeInterval($ageMin, $ageMax);
+
         return $this->render('personne/index', [
             'personnes' => $personnes
         ]);
@@ -92,6 +92,9 @@ class PersonneController extends AbstractController
  
         $personnes = $repository->findBy([], [], $nbre, ($page - 1) * $nbre);
 
+        $listAllPersonneEvent = new ListAllPersonnesEvent(count($personnes));
+        $this->dispatcher->dispatch($listAllPersonneEvent, ListAllPersonnesEvent::LIST_ALL_PERSONNE_EVENT);
+
         return $this->render('personne/index.html.twig', [
             'personnes' => $personnes,
             'isPaginated' => true,
@@ -102,7 +105,9 @@ class PersonneController extends AbstractController
     }
 
     //Les detailles d'une personne
-    #[Route('/{id<\d+>}', name: 'personne.detail')]
+    #[Route('/{id<\d+>}', name: 'personne.detail'),
+        IsGranted("ROLE_ADMIN")
+    ]
     public function detail(Personne $personne = null): Response
     {
         if (!$personne) {
@@ -117,7 +122,7 @@ class PersonneController extends AbstractController
     //Ajout d'une personne
     #[Route('/edit/{id?0}', name: 'personne.edit')]
     public function addPersonne(
-        Personne $personne=null,
+        Personne $personne = null,
         ManagerRegistry $doctrine,
         Request $request ,
         UploaderService $uploaderService,
@@ -134,7 +139,7 @@ class PersonneController extends AbstractController
         $form = $this -> createForm(PersonneType::class, $personne);
         $form->remove('createdAt');
         $form->remove('updatedAt');
-        //Mon formulaire va  aller traiter la request
+        //Mon formulaire va aller traiter la request
         // association de la request envoyer avec le formulaire
         $form -> handleRequest($request);
         //Est ce que le formulaire à ete soumis
@@ -168,12 +173,12 @@ class PersonneController extends AbstractController
                 $this->dispatcher->dispatch($addPersonneEvent,AddPersonneEvent::ADD_PERSONNE_EVENT);
 
             }
-
-            $mailMessage= $personne->getFirstname().' '.$personne->getName().' '.$message;
-            //Afficher un message du succes
             $this->addFlash('success', $personne->getName() . $message);
-            $mailer ->sendEmail(content: $mailMessage);
-            //Si non  rediriger vers la liste des personnes
+
+
+            //Afficher un message du succes
+
+            //Si non rediriger vers la liste des personnes
             return $this->redirectToRoute('/');
         }else{
             //Si non

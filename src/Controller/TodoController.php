@@ -7,7 +7,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
 #[Route("/todo")]
 class TodoController extends AbstractController
 {
@@ -49,7 +48,7 @@ class TodoController extends AbstractController
                     //sinon on l'ajoute et on affiche un message de succes
                     $todos[$name]=$content;
                     $session->set('todos',$todos);
-                    $this->addFlash('succes',"Le todo d'id $name a ete ajouté avec succes");
+                    $this->addFlash('success',"Le todo d'id $name a ete ajouté avec succès");
                     //Mise à jour du tab
                 }
         }else{
@@ -58,9 +57,8 @@ class TodoController extends AbstractController
              $this->addFlash('error',"La liste des todos n'est pas encore  initialisée");
         }
         //Affichage de la liste todo soit avec forword ou redirect
-        return $this->redirectToRoute('todo/index.html.twig');
+        return $this->redirectToRoute('todo');
     }
-
     #[Route('/update/{name}/{content}',name:'todo.update')]
     public function updateTodo(Request $request,$name,$content): RedirectResponse{
         //Voici l'algorithme à utiliser pour gerer notre todo
@@ -88,7 +86,7 @@ class TodoController extends AbstractController
              $this->addFlash('error',"La liste des todos n'est pas encore  initialisée");
         }
         //Affichage de la liste todo soit avec forword ou redirect
-        return $this->redirectToRoute('todo_index');
+        return $this->redirectToRoute('todo');
     }
 
     #[Route('/delete/{name}',name:'todo.delete')]
@@ -118,7 +116,7 @@ class TodoController extends AbstractController
              $this->addFlash('error',"La liste des todos n'est pas encore  initialisée");
         }
         //Affichage de la liste todo soit avec forword ou redirect
-        return $this->redirectToRoute('todo_index');
+        return $this->redirectToRoute('todo');
     }
     #[Route('/reset',name:'todo.reset')]
     public function resetTodo(Request $request): RedirectResponse{
@@ -127,6 +125,6 @@ class TodoController extends AbstractController
         $session->remove('todos');
        
         //Affichage de la liste todo soit avec forword ou redirect
-        return $this->redirectToRoute('todo_index');
+        return $this->redirectToRoute('todo');
     }
 }

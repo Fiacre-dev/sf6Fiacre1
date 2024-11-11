@@ -5,7 +5,8 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
 class MyCustomTwigExtensions extends AbstractExtension {
-    public function getFilters(){
+    public function getFilters(): array
+    {
         return[
             new TwigFilter(
                 "defaultImages",

@@ -15,7 +15,7 @@
         <link href="{{asset('node_modules/@fortawesome/fontawesone-free/css/all.css')}}" rel="stylesheet" />
         <link href="{{ asset('node_modules/select2/dist/css/select2.min.css') }}" rel="stylesheet" />
         {% block stylesheets %}
-            
+
         {% endblock %}
 
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
@@ -90,12 +90,12 @@
                                             <a class="nav-link" href="password.html">Forgot Password</a>
                                         </nav>
                                     </div> #}
-                                        {% if is_granted('ROLE_ADMIN') %}
+{#                                        {% if is_granted('ROLE_ADMIN') %}#}
 
                                             <a class="nav-link collapsed" href="{{ path('personne.edit')}}">
                                                 Ajouter une personne
                                             </a>
-                                        {% endif %}
+{#                                        {% endif %}#}
                                     </nav>
                                 </div>
                                 {# <div class="sb-sidenav-menu-heading">Addons</div>
